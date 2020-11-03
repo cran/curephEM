@@ -1,0 +1,71 @@
+---
+title: "Fit Logistic-CoxPH Cure-Rate Model"
+author: "Jue (Marquis) Hou"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Fit Logistic-CoxPH Cure-Rate Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This is a brief guide on package `cureph` illustrated with a simulated data set. First, you should load the package. 
+```{r, results= 'hide'}
+library(curephEM)
+```
+
+## The simulated data
+
+You may generate a simulated dataset using the build-in function `cureph.simgen()`
+
+```{r}
+sim.cureph.data = cureph.simgen()
+attach(sim.cureph.data)
+```
+
+The true parameters are stored in the attributes `true.coef` and `true.baseline.surv`. 
+```{r, results='markup'}
+attr(sim.cureph.data, 'true.coef')
+```
+
+## Fit the model
+
+You may use the conventional syntax for `coxph` to fit a `cureph`, except for the use of a newly defined `Surv.cure` object instead of `Surv`. 
+
+```{r, results= 'hide'}
+Surv.cure(time,time2,event,origin=0,end=20)
+```
+
+If only one formula is provided, the set of covariates goes into both the logistic part and the cox part of the model. 
+```{r, results= 'hide',warning=F}
+fit=cureph(Surv.cure(time,time2,event,origin=0,end=20)~Z1+Z2+Z3+Z4,data=sim.cureph.data)
+```
+
+Alternatively, you can provide two formulae---first `formula` for logistic part, then `formula2` for cox part. 
+```{r, results= 'hide',warning=F}
+fit2=cureph(Surv.cure(time,time2,event,origin=0,end=20)~Z1+Z2+Z3+Z4,
+  formula2 = ~ Z1+Z2,data=sim.cureph.data)
+```
+
+## Post Estimation
+
+A detailed summary can be produced in a generic way. A multivariate Wald test table is activated if the two sets of covariates are detected to be the same. The null hypothesis is all the coefficients associated with the listed covariate are all zero. 
+```{r}
+summary(fit)
+```
+
+Another function `survpred` combines conventional `predict` and `survfit`. It returns the linear predictors for both part, the estimated probabilities, the mean-baselevel survival in cox part and the marginal mean-baselevel survival. 
+```{r}
+mysurv = survpred(fit)
+```
+
+The generic `plot` function produces the survival curves. 
+```{r, fig.show='hold',fig.cap = "Left: Estimated marginal survival at mean-baselevel. Right: Baseline survival in cox part. "}
+plot(mysurv)
+plot(mysurv, pooled = F)
+```
+
+Detach the simulated data. 
+```{r}
+detach(sim.cureph.data)
+```

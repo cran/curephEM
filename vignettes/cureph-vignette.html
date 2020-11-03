@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Jue (Marquis) Hou" />
+
+<meta name="date" content="2016-12-30" />
+
+<title>Fit Logistic-CoxPH Cure-Rate Model</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Fit Logistic-CoxPH Cure-Rate Model</h1>
+<h4 class="author"><em>Jue (Marquis) Hou</em></h4>
+<h4 class="date"><em>2016-12-30</em></h4>
+
+
+
+<p>This is a brief guide on package <code>cureph</code> illustrated with a simulated data set. First, you should load the package.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(cureph)</code></pre></div>
+<pre><code>## Loading required package: survival</code></pre>
+<pre><code>## Loading required package: Matrix</code></pre>
+<pre><code>## Loading required package: gsl</code></pre>
+<div id="the-simulated-data" class="section level2">
+<h2>The simulated data</h2>
+<p>You may generate a simulated dataset using the build-in function <code>cureph.simgen()</code></p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sim.cureph.data =<span class="st"> </span><span class="kw">cureph.simgen</span>()
+<span class="kw">attach</span>(sim.cureph.data)</code></pre></div>
+<p>The true parameters are stored in the attributes <code>true.coef</code> and <code>true.baseline.surv</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">attr</span>(sim.cureph.data, <span class="st">'true.coef'</span>)</code></pre></div>
+<pre><code>## $a
+## [1]  1.00 -0.63  1.00  0.00  0.00  0.00  0.00
+## 
+## $b
+## [1] -0.2  0.3  0.0  0.0  0.0  0.0</code></pre>
+</div>
+<div id="fit-the-model" class="section level2">
+<h2>Fit the model</h2>
+<p>You may use the conventional syntax for <code>coxph</code> to fit a <code>cureph</code>, except for the use of a newly defined <code>Surv.cure</code> object instead of <code>Surv</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">Surv.cure</span>(time,time2,event,<span class="dt">origin=</span><span class="dv">0</span>,<span class="dt">end=</span><span class="dv">20</span>)</code></pre></div>
+<p>If only one formula is provided, the set of covariates goes into both the logistic part and the cox part of the model.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit=<span class="kw">cureph</span>(<span class="kw">Surv.cure</span>(time,time2,event,<span class="dt">origin=</span><span class="dv">0</span>,<span class="dt">end=</span><span class="dv">20</span>)~Z1+Z2+Z3+Z4,<span class="dt">data=</span>sim.cureph.data)</code></pre></div>
+<pre><code>## Converge at step  80</code></pre>
+<p>Alternatively, you can provide two formulae—first <code>formula</code> for logistic part, then <code>formula2</code> for cox part.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fit2=<span class="kw">cureph</span>(<span class="kw">Surv.cure</span>(time,time2,event,<span class="dt">origin=</span><span class="dv">0</span>,<span class="dt">end=</span><span class="dv">20</span>)~Z1+Z2+Z3+Z4,
+  <span class="dt">formula2 =</span> ~<span class="st"> </span>Z1+Z2,<span class="dt">data=</span>sim.cureph.data)</code></pre></div>
+<pre><code>## Converge at step  77</code></pre>
+</div>
+<div id="post-estimation" class="section level2">
+<h2>Post Estimation</h2>
+<p>A detailed summary can be produced in a generic way. A multivariate Wald test table is activated if the two sets of covariates are detected to be the same. The null hypothesis is all the coefficients associated with the listed covariate are all zero.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(fit)</code></pre></div>
+<pre><code>## Call:
+## cureph(formula = Surv.cure(time, time2, event, origin = 0, end = 20) ~ 
+##     Z1 + Z2 + Z3 + Z4, data = sim.cureph.data)
+## 
+## Logistic Model: 
+## Surv.cure(time, time2, event, origin = 0, end = 20) ~ Z1 + Z2 + 
+##     Z3 + Z4
+## Cox Model: 
+## Surv.cure(time, time2, event, origin = 0, end = 20) ~ Z1 + Z2 + 
+##     Z3 + Z4
+## 
+##   n= 200, number of events= 37
+##  
+## Logistic:
+##             coef    exp(coef) se(coef) z      Pr(&gt;|z|)   
+## (Intercept) 1.1443  3.1401    0.8815   1.298  0.194      
+## Z1          -0.5736 0.5635    0.214    -2.681 0.007    **
+## Z21         0.663   1.9405    0.463    1.432  0.152      
+## Z3B         0.0518  1.0532    0.5129   0.101  0.919      
+## Z3C         -0.4845 0.616     0.5536   -0.875 0.381      
+## Z41         0.2885  1.3344    0.4651   0.62   0.535      
+## Z42         &lt;NA&gt;    &lt;NA&gt;      0        &lt;NA&gt;   &lt;NA&gt;       
+## 
+## Cox:
+##     coef    exp(coef) se(coef) z      Pr(&gt;|z|)  
+## Z1  -0.4599 0.6314    0.2095   -2.196 0.028    *
+## Z21 -0.1397 0.8697    0.4808   -0.29  0.771     
+## Z3B -0.0797 0.9234    0.4878   -0.163 0.87      
+## Z3C 0.0829  1.0864    0.5583   0.148  0.882     
+## Z41 0.6853  1.9845    0.4325   1.585  0.113     
+## Z42 &lt;NA&gt;    &lt;NA&gt;      0        &lt;NA&gt;   &lt;NA&gt;      
+## 
+## Combined Wald tests: 
+##    Wald-chi.square df p-value   
+## Z1 12.782          2  0.002   **
+## Z2 2.062           2  0.357     
+## Z3 1.278           4  0.865     
+## Z4 &lt;NA&gt;            4  &lt;NA&gt;      
+## --- 
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Logistic:
+##             exp(coef) exp(-coef) lower .95 upper .95
+## (Intercept)    3.1401     0.3185    0.5579   17.6733
+## Z1             0.5635     1.7747    0.3705    0.8571
+## Z21            1.9405     0.5153    0.7831    4.8087
+## Z3B            1.0532     0.9495    0.3854    2.8781
+## Z3C            0.6160     1.6234    0.2082    1.8230
+## Z41            1.3344     0.7494    0.5363    3.3207
+## Z42                NA         NA        NA        NA
+## 
+## Cox:
+##     exp(coef) exp(-coef) lower .95 upper .95
+## Z1     0.6314     1.5839    0.4188    0.9518
+## Z21    0.8697     1.1499    0.3389    2.2315
+## Z3B    0.9234     1.0830    0.3549    2.4022
+## Z3C    1.0864     0.9205    0.3637    3.2454
+## Z41    1.9845     0.5039    0.8501    4.6324
+## Z42        NA         NA        NA        NA
+## 
+## Wald test = 29.24 on 11 df, p = 0.002083</code></pre>
+<p>Another function <code>survpred</code> combines conventional <code>predict</code> and <code>survfit</code>. It returns the linear predictors for both part, the estimated probabilities, the mean-baselevel survival in cox part and the marginal mean-baselevel survival.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mysurv =<span class="st"> </span><span class="kw">survpred</span>(fit)</code></pre></div>
+<p>The generic <code>plot</code> function produces the survival curves.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(mysurv)
+<span class="kw">plot</span>(mysurv, <span class="dt">pooled =</span> F)</code></pre></div>
+<p><img src="data:image/png;base64,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" alt="Left: Estimated marginal survival at mean-baselevel. Right: Baseline survival in cox part." /><img src="data:image/png;base64,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" alt="Left: Estimated marginal survival at mean-baselevel. Right: Baseline survival in cox part." /></p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

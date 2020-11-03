@@ -1,0 +1,20 @@
+import(survival)
+importFrom(Matrix,bdiag)
+export(basehaz.cureph)
+export(cureph)
+export(Surv.cure)
+export(cureph.control)
+export(survpred.cureph)
+export(survpred)
+export(cureph.simgen)
+S3method(print,summary.cureph)
+S3method(print,Surv.cure)
+S3method('[',Surv.cure)
+S3method(summary,cureph)
+S3method(survpred,cureph)
+S3method(plot,survpred.cureph)
+importFrom("graphics", "abline", "lines", "plot", "points")
+importFrom("stats", "binomial", "coef", "delete.response", "formula",
+               "glm", "knots", "model.extract", "model.matrix",
+               "model.offset", "pchisq", "pnorm", "predict", "qnorm",
+               "rbinom", "rnorm", "runif", "stepfun", "terms")
