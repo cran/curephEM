@@ -56,7 +56,7 @@ cureph=function (formula, formula2 , data,  subset, na.action, init, control,
   {
     time2 = Y[,1]
     event = as.numeric(Y[,2] == 1)
-    origin = min( time2 ) - 1
+    origin = attributes(Y)$origin
     time = rep(origin,data.n)
     end = min(time2[Y[,2] == 0])
 
@@ -222,10 +222,13 @@ cureph=function (formula, formula2 , data,  subset, na.action, init, control,
 
   }
 
-  fit$var.levels = pmax(sapply(data[,
+  if(length(attr(Terms1,"term.labels"))>0)
+  {
+    fit$var.levels = pmax(sapply(data[,
                                      apply(outer(attr(Terms1,"term.labels"),colnames(data),'==')
                                           ,1,which)]
                                 ,nlevels)-1,1)
+  }
 
 
   fit$formula.logistic <- formula(Terms1)
@@ -239,22 +242,42 @@ cureph=function (formula, formula2 , data,  subset, na.action, init, control,
   fit$call <- Call
   fit$method <- method
 
-  binary.A = apply(A, 2,check.binary)
-  binary.Z = apply(Z, 2,check.binary)
-  mean.A = apply(A,2,mean,na.rm=T)
-  mean.Z = apply(Z,2,mean,na.rm=T)
-  mean.A[binary.A] = apply(A,2,min,na.rm=T)[binary.A]
-  mean.Z[binary.Z] = apply(Z,2,min,na.rm=T)[binary.Z]
-  fit$means <- list( logistic = mean.A,
-                     cox = mean.Z)
-  fit$coefficients=list(logistic = fit$coefficients[1:(ncol(A)+1)],
-                        cox =  fit$coefficients[-(1:(ncol(A)+1))])
+  colnames(fit$var)=rownames(fit$var)=c("logistic: (Intercept)",
+                                        rep(NA, ncol(fit$var)-1))
+  if(ncol(A)>0)
+  {
+    binary.A = apply(A, 2,check.binary)
+    mean.A = apply(A,2,mean,na.rm=T)
+    mean.A[binary.A] = apply(A,2,min,na.rm=T)[binary.A]
+  }
+  if(ncol(Z)>0)
+  {
+    binary.Z = apply(Z, 2,check.binary)
+    mean.Z = apply(Z,2,mean,na.rm=T)
+    mean.Z[binary.Z] = apply(Z,2,min,na.rm=T)[binary.Z]
+  }
+  if(ncol(A)+ncol(Z) > 0)
+  {
+    fit$means <- list()
+  }
+  fitcoef = fit$coefficients
+  fit$coefficients=list(logistic = fitcoef[1:(ncol(A)+1)])
+  if(ncol(A)>0)
+  {
+    fit$means$logistic = mean.A
+    names(fit$means$logistic) <- colnames(A)
+    colnames(fit$var)[1+1:ncol(A)]=rownames(fit$var)[1+1:ncol(A)] =
+      paste('logistic:', colnames(A))
+  }
+  if(ncol(Z)>0)
+  {
+    fit$means$cox = mean.Z
+    fit$coefficients$cox = fitcoef[-(1:(ncol(A)+1))]
+    names(fit$coefficients$cox) <- names(fit$means$cox) <- colnames(Z)
+    colnames(fit$var)[-1-0:ncol(A)]=rownames(fit$var)[-1-0:ncol(A)] =
+      paste('cox:', colnames(Z))
+  }
   names(fit$coefficients$logistic) <-  c('(Intercept)', colnames(A))
-  names(fit$coefficients$cox) <- names(fit$means$cox) <- colnames(Z)
-  names(fit$means$logistic) <- colnames(A)
-
-  colnames(fit$var)=rownames(fit$var)=c(paste('logistic:',c('(Intercept)', colnames(A))),
-              paste('cox:', colnames(Z)))
 
   fit$data = data
   fit$Y = Y

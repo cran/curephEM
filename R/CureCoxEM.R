@@ -87,13 +87,14 @@ CureCox.EM=function(Y, A, Z, init, control, var.method)
                             a[c(TRUE,flag1)],b[flag2],baseline)
 
   iter=tmp$iter
+
   loglik=CureCox.EM.loglik(tmp,Y,Y[,3],matrix(A[,flag1],nobs),
                            matrix(Z[,flag2],nobs))
 
   #    concordance <- survConcordance.fit(y, lp, strata, weights)
   list(coefficients = coef, var = var, loglik = loglik,baseline = tmp$Lam0,
        #         score = agfit$sctest,
-       iter = iter,
+       iter = iter, posterior = drop(tmp$p.event),
        #          linear.predictors = as.vector(lp),
        #         residuals = resid, means = agfit$means, concordance = concordance,
        method = "curph.EM")
@@ -117,7 +118,15 @@ CureCox.EM.fit=function(survn,yn,A=NULL,Z=NULL,nstep=200,thres=1e-8,
   pZ=ncol(Z)
 
   if(is.null(a0))   # initialize a0 (with intercept)
-    a0=coef(glm(yn~A,subset= yn!=-1)) # start all 0 by default
+  {
+    if(pA == 0)
+    {
+      a0=coef(glm(yn~1,subset= yn!=-1)) # start all 0 by default
+    }else{
+      a0=coef(glm(yn~A,subset= yn!=-1)) # start all 0 by default
+    }
+
+  }
 
   if(pZ==0)
     coxfit0=survival::coxph(survn~1,subset= yn==1,ties="breslow") # fit a naive coxph
@@ -187,7 +196,8 @@ CureCox.EM.fit=function(survn,yn,A=NULL,Z=NULL,nstep=200,thres=1e-8,
 
   lam0=diff(Lam0(c(0,tk)))
 
-  return(list(a=coef(curefit0),b=coef(coxfit0),Lam0=Lam0,lam0=lam0))
+  return(list(a=coef(curefit0),b=coef(coxfit0),Lam0=Lam0,lam0=lam0,
+              p.event = tempE$p.event))
 }
 
 # E-step returns weights
@@ -228,7 +238,11 @@ CureCox.E=function(survn,yn,pn,ph,Lam0,tk)
 
   # Weight for log p
   wy1=(yn==1)  # observe y=1
-  if(cN>0) wy1[dn]=Eyn # censored y=-1
+  if(cN>0)
+  {
+    wy1[dn]=Eyn # censored y=-1
+    p.event = wy1
+  }
   wy1=wy1+mn # truncated ghost samples
 
   # Weight for log(1-p)
@@ -244,7 +258,8 @@ CureCox.E=function(survn,yn,pn,ph,Lam0,tk)
   wfk=apply(wfnk,1,sum)
   if(cN>0) wSn=Eyn else wSn=NULL  # weight for Sn(Cn)
 
-  return(list(wy1=wy1,wy0=wy0,wfnk=wfnk,wSn=wSn,wfk=wfk))
+  return(list(wy1=wy1,wy0=wy0,wfnk=wfnk,wSn=wSn,wfk=wfk,
+              p.event = p.event))
 
 }
 
@@ -331,6 +346,8 @@ CureCox.EM.loglik=function(fit,survn,yn,Xn=NULL,Zn=NULL,a=fit$a,b=fit$b,Lam0=fit
 
   Xa=Xn %*% a
   if(is.null(Zn))
+    Zb=rep(0,length(yn))
+  else if(ncol(Zn) == 0)
     Zb=rep(0,length(yn))
   else
     Zb=Zn %*% b

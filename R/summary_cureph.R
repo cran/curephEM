@@ -30,16 +30,21 @@ summary.cureph <- function(object, combine = T, ...)
     dimnames(conf.int) = list(names(coef.p),
                               c('exp(coef)', 'exp(-coef)', 'lower .95', 'upper .95'))
 
-    coef.table= list(logistic=coef.table[1:p.logistic, ],
-                     cox=coef.table[-(1:p.logistic), ])
+    coef.table= list(logistic=coef.table[1:p.logistic, ,drop=F],
+                     cox=coef.table[-(1:p.logistic), ,drop=F ])
     rownames(coef.table$logistic)=names(coef(object)$logistic)
     rownames(coef.table$cox)=names(coef(object)$cox)
-    conf.int =list(logistic=conf.int[1:p.logistic, ],
-                   cox=conf.int[-(1:p.logistic), ])
+    conf.int =list(logistic=conf.int[1:p.logistic,,drop=F  ],
+                   cox=conf.int[-(1:p.logistic),,drop=F  ])
     rownames(conf.int$logistic)=names(coef(object)$logistic)
     rownames(conf.int$cox)=names(coef(object)$cox)
 
-    if(combine)
+    if(length(object$var.levels)==0)
+    {
+      combine = F
+    }
+
+    if(combine & length(object$var.levels)>0)
       if((length(coef(object)$logistic) - 1 != length(coef(object)$cox)) ||
          any(names(coef(object)$logistic)[-1] != names(coef(object)$cox)))
       {
@@ -146,9 +151,11 @@ print.summary.cureph=function(x, digits = max(3, getOption("digits") - 3),
   cat('Logistic:\n')
   print(coef.logistic,quote = FALSE)
   cat('\n')
-  cat('Cox:\n')
-  print(coef.cox,quote = FALSE)
-
+  if(nrow(coef.cox)>0)
+  {
+    cat('Cox:\n')
+    print(coef.cox,quote = FALSE)
+  }
   if(x$combine)
   {
     comb.wald = x$comb.wald
@@ -181,9 +188,12 @@ print.summary.cureph=function(x, digits = max(3, getOption("digits") - 3),
   cat('Logistic:\n')
   print(x$conf.int$logistic,digits=digits)
   cat('\n')
-  cat('Cox:\n')
-  print(x$conf.int$cox,digits=digits)
-  cat('\n')
+  if(nrow(coef.cox)>0)
+  {
+    cat('Cox:\n')
+    print(x$conf.int$cox,digits=digits)
+    cat('\n')
+  }
   cat(paste('Wald test =', signif(x$wald.test,digits=digits), 'on', x$df, 'df, p =',
             signif(1-pchisq(x$wald.test,x$df),digits=digits)))
 

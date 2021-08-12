@@ -35,7 +35,7 @@ CureCox.Louis.Ehess=function(survn,yn,A,Z,a,b,Lam0)
 {
   tk=knots(Lam0)
   K=length(tk)        # number of unique event times
-  nk=table(survn[yn==1,2]) # counting ties, usually all 1
+  nk=apply(outer(survn[yn==1,2], tk, "=="),2,sum) # counting ties, usually all 1
   dn= yn==-1   # censoring indicator
   N=nrow(survn) # Sample size
   cN=sum(dn)   # censor sample size
@@ -148,9 +148,13 @@ CureCox.Louis.Egradn=function(survn,yn,A,Z,a,b,Lam0)
   gradn.a=A*wa
 
   # Gradient for b
-
-  wb=Eyn*((yn==1)-phaz*Lam0(survn[,2]))+Emn*(1-apply(PTitk*Lnk,1,sum))
-  gradn.b=Z*wb
+  if(length(b)>0)
+  {
+    wb=Eyn*((yn==1)-phaz*Lam0(survn[,2]))+Emn*(1-apply(PTitk*Lnk,1,sum))
+    gradn.b=Z*wb
+  }else{
+    gradn.b = NULL
+  }
 
   # Gradient for lambda
 
@@ -173,8 +177,11 @@ CureCox.Louis.Egradsq=function(survn,yn,A,Z,a,b,Lam0)
 
   # Expectation of gradients
   temp=CureCox.Louis.Egradn(survn,yn,A,Z,a,b,Lam0)
-  gradn.a=temp[,1:length(a)]
-  gradn.b=temp[,length(a)+1:length(b)]
+  gradn.a=temp[,1:length(a),drop = F]
+  if(length(b) > 0)
+  {
+    gradn.b=temp[,length(a)+1:length(b)]
+  }
   gradn.lam=temp[,-(1:(length(a)+length(b)))]
 
   A=cbind(1,A)
@@ -227,36 +234,44 @@ CureCox.Louis.Egradsq=function(survn,yn,A,Z,a,b,Lam0)
   waa=(1-pn)^2*Varmn+Varyn
   grad.aa=t(gradn.a)%*%gradn.a+t(A)%*%diag(waa)%*%A
 
-  # beta terms
-  wb.I=(yn==1)-phaz*Lam0(survn[,2])
-
-  # Grad.ab
-  wab=Varyn*(wb.I) +
-    Varmn*(1-pn)*(1+sumtQPS)
-  grad.ab=t(gradn.a)%*%gradn.b + t(A) %*% diag(wab)%*% Z
-
-
-  # Grad.bb
-  wbb=Varyn*(wb.I)^2 +
-    Varmn*(1+sumtQPS)^2 +
-    Emn*(apply(PTitk*Lnk^2,1,sum)-sumtQPS^2)
-  grad.bb=t(gradn.b)%*%gradn.b+t(Z) %*% diag(wbb) %*% Z
-
   # Lambda terms
   wll.I=I.Xieqtk*(yn==1)/col.lamk- I.Xi.tk*phaz
   wll.II=PTitk/col.lamk-PTijtk*phaz
   wll.III=PTitk/col.lamk^2-2*PTitk/col.lamk*phaz+PTijtk*phaz^2
 
+  # beta terms
+  wb.I=(yn==1)-phaz*Lam0(survn[,2])
+
+  # Grad.ab
+  if(length(b)>0)
+  {
+    wab=Varyn*(wb.I) +
+      Varmn*(1-pn)*(1+sumtQPS)
+    grad.ab=t(gradn.a)%*%gradn.b + t(A) %*% diag(wab)%*% Z
+
+
+  # Grad.bb
+    wbb=Varyn*(wb.I)^2 +
+      Varmn*(1+sumtQPS)^2 +
+      Emn*(apply(PTitk*Lnk^2,1,sum)-sumtQPS^2)
+    grad.bb=t(gradn.b)%*%gradn.b+t(Z) %*% diag(wbb) %*% Z
+
+  # Grad.blam
+    wblam= wll.I *  Varyn *(wb.I) +
+      wll.II*Varmn*(1+sumtQPS) -
+      (PTitk*(Lnk+sumtQPS)/col.lamk-PTijtk*phaz*sumtQPS+sumtkQPS*phaz)*Emn
+    grad.blam=t(gradn.b)%*%gradn.lam+t(Z)%*%wblam
+  }else{
+    grad.ab = matrix(NA,length(a),0)
+    grad.bb = matrix(NA,0,0)
+    grad.blam = matrix(NA,0,K)
+  }
+
+
 
   # Grad.alam
   walam=wll.I*Varyn+wll.II*Varmn*(1-pn)
   grad.alam=t(gradn.a)%*%gradn.lam+t(A)%*%walam
-
-  # Grad.blam
-  wblam= wll.I *  Varyn *(wb.I) +
-    wll.II*Varmn*(1+sumtQPS) -
-    (PTitk*(Lnk+sumtQPS)/col.lamk-PTijtk*phaz*sumtQPS+sumtkQPS*phaz)*Emn
-  grad.blam=t(gradn.b)%*%gradn.lam+t(Z)%*%wblam
 
 
   # Grad.lamlam
