@@ -12,7 +12,7 @@
 
 <meta name="author" content="Jue (Marquis) Hou" />
 
-<meta name="date" content="2021-08-12" />
+<meta name="date" content="2022-05-31" />
 
 <title>Fit Logistic-CoxPH Cure-Rate Model</title>
 
@@ -141,7 +141,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <h1 class="title toc-ignore">Fit Logistic-CoxPH Cure-Rate Model</h1>
 <h4 class="author">Jue (Marquis) Hou</h4>
-<h4 class="date">2021-08-12</h4>
+<h4 class="date">2022-05-31</h4>
 
 
 
@@ -168,11 +168,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Surv.cure</span>(time,time2,event,<span class="at">origin=</span><span class="dv">0</span>,<span class="at">end=</span><span class="dv">20</span>)</span></code></pre></div>
 <p>If only one formula is provided, the set of covariates goes into both the logistic part and the cox part of the model.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">=</span><span class="fu">cureph</span>(<span class="fu">Surv.cure</span>(time,time2,event,<span class="at">origin=</span><span class="dv">0</span>,<span class="at">end=</span><span class="dv">20</span>)<span class="sc">~</span>Z1<span class="sc">+</span>Z2<span class="sc">+</span>Z3<span class="sc">+</span>Z4,<span class="at">data=</span>sim.cureph.data)</span></code></pre></div>
-<pre><code>## Converge at step  97</code></pre>
+<pre><code>## Converge at step  86</code></pre>
 <p>Alternatively, you can provide two formulae—first <code>formula</code> for logistic part, then <code>formula2</code> for cox part.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fit2<span class="ot">=</span><span class="fu">cureph</span>(<span class="fu">Surv.cure</span>(time,time2,event,<span class="at">origin=</span><span class="dv">0</span>,<span class="at">end=</span><span class="dv">20</span>)<span class="sc">~</span>Z1<span class="sc">+</span>Z2<span class="sc">+</span>Z3<span class="sc">+</span>Z4,</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula2 =</span> <span class="sc">~</span> Z1<span class="sc">+</span>Z2,<span class="at">data=</span>sim.cureph.data)</span></code></pre></div>
-<pre><code>## Converge at step  69</code></pre>
+<pre><code>## Converge at step  53</code></pre>
 </div>
 <div id="post-estimation" class="section level2">
 <h2>Post Estimation</h2>
@@ -189,56 +189,56 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ## Surv.cure(time, time2, event, origin = 0, end = 20) ~ Z1 + Z2 + 
 ##     Z3 + Z4
 ## 
-##   n= 200, number of events= 28
+##   n= 200, number of events= 32
 ##  
 ## Logistic:
-##             coef    exp(coef) se(coef) z      Pr(&gt;|z|)   
-## (Intercept) 1.044   2.8405    0.9653   1.081  0.279      
-## Z1          -0.6436 0.5254    0.2278   -2.825 0.005    **
-## Z21         1.144   3.1392    0.492    2.325  0.02     * 
-## Z3B         -0.7428 0.4758    0.5641   -1.317 0.188      
-## Z3C         -0.1317 0.8766    0.5848   -0.225 0.822      
-## Z41         0.1202  1.1278    0.4926   0.244  0.807      
-## Z42         &lt;NA&gt;    &lt;NA&gt;      0        &lt;NA&gt;   &lt;NA&gt;       
+##             coef    exp(coef) se(coef) z      Pr(&gt;|z|)    
+## (Intercept) 1.9372  6.9393    0.9579   2.022  0.043    *  
+## Z1          -0.8117 0.4441    0.2364   -3.434 6e-04    ***
+## Z21         0.5959  1.8148    0.4702   1.268  0.205       
+## Z3B         -0.2848 0.7522    0.5293   -0.538 0.591       
+## Z3C         -0.1986 0.8199    0.5498   -0.361 0.718       
+## Z41         -0.3741 0.6879    0.4595   -0.814 0.416       
+## Z42         &lt;NA&gt;    &lt;NA&gt;      0        &lt;NA&gt;   &lt;NA&gt;        
 ## 
 ## Cox:
 ##     coef    exp(coef) se(coef) z      Pr(&gt;|z|)  
-## Z1  -0.652  0.521     0.2667   -2.445 0.014    *
-## Z21 0.6047  1.8306    0.4677   1.293  0.196     
-## Z3B -0.5449 0.5799    0.5997   -0.909 0.364     
-## Z3C -0.7043 0.4945    0.5629   -1.251 0.211     
-## Z41 -0.4924 0.6112    0.4729   -1.041 0.298     
+## Z1  -0.1013 0.9036    0.2085   -0.486 0.627     
+## Z21 0.5145  1.6728    0.661    0.778  0.436     
+## Z3B -0.2278 0.7963    0.6693   -0.34  0.734     
+## Z3C -0.3241 0.7232    0.6701   -0.484 0.629     
+## Z41 0.0632  1.0653    0.5753   0.11   0.913     
 ## Z42 &lt;NA&gt;    &lt;NA&gt;      0        &lt;NA&gt;   &lt;NA&gt;      
 ## 
 ## Combined Wald tests: 
-##    Wald-chi.square df p-value    
-## Z1 14.982          2  6e-04   ***
-## Z2 7.37            2  0.025   *  
-## Z3 3.889           4  0.421      
-## Z4 &lt;NA&gt;            4  &lt;NA&gt;       
+##    Wald-chi.square df p-value   
+## Z1 12.944          2  0.002   **
+## Z2 2.743           2  0.254     
+## Z3 0.717           4  0.949     
+## Z4 &lt;NA&gt;            4  &lt;NA&gt;      
 ## --- 
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## Logistic:
 ##             exp(coef) exp(-coef) lower .95 upper .95
-## (Intercept)    2.8405     0.3521    0.4282   18.8405
-## Z1             0.5254     1.9034    0.3362    0.8211
-## Z21            3.1392     0.3185    1.1969    8.2336
-## Z3B            0.4758     2.1017    0.1575    1.4375
-## Z3C            0.8766     1.1407    0.2786    2.7579
-## Z41            1.1278     0.8867    0.4294    2.9618
+## (Intercept)    6.9393     0.1441    1.0616   45.3584
+## Z1             0.4441     2.2518    0.2794    0.7058
+## Z21            1.8148     0.5510    0.7221    4.5606
+## Z3B            0.7522     1.3295    0.2665    2.1225
+## Z3C            0.8199     1.2197    0.2791    2.4082
+## Z41            0.6879     1.4537    0.2795    1.6930
 ## Z42                NA         NA        NA        NA
 ## 
 ## Cox:
 ##     exp(coef) exp(-coef) lower .95 upper .95
-## Z1     0.5210     1.9194    0.3089    0.8787
-## Z21    1.8306     0.5463    0.7320    4.5783
-## Z3B    0.5799     1.7245    0.1790    1.8784
-## Z3C    0.4945     2.0224    0.1640    1.4904
-## Z41    0.6112     1.6362    0.2419    1.5441
+## Z1     0.9036     1.1066    0.6005     1.360
+## Z21    1.6728     0.5978    0.4579     6.111
+## Z3B    0.7963     1.2559    0.2144     2.957
+## Z3C    0.7232     1.3828    0.1945     2.689
+## Z41    1.0653     0.9387    0.3449     3.290
 ## Z42        NA         NA        NA        NA
 ## 
-## Wald test = 41.62 on 11 df, p = 1.883e-05</code></pre>
+## Wald test = 39.62 on 11 df, p = 4.149e-05</code></pre>
 <p>Another function <code>survpred</code> combines conventional <code>predict</code> and <code>survfit</code>. It returns the linear predictors for both part, the estimated probabilities, the mean-baselevel survival in cox part and the marginal mean-baselevel survival.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mysurv <span class="ot">=</span> <span class="fu">survpred</span>(fit)</span></code></pre></div>
 <pre><code>## Warning in prob0 * surv.cox: Recycling array of length 1 in array-vector arithmetic is deprecated.
@@ -248,7 +248,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>The generic <code>plot</code> function produces the survival curves.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mysurv)</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mysurv, <span class="at">pooled =</span> F)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" alt="Left: Estimated marginal survival at mean-baselevel. Right: Baseline survival in cox part." /><img src="data:image/png;base64,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" alt="Left: Estimated marginal survival at mean-baselevel. Right: Baseline survival in cox part." /></p>
+<p><img src="data:image/png;base64,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" alt="Left: Estimated marginal survival at mean-baselevel. Right: Baseline survival in cox part." /><img src="data:image/png;base64,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" alt="Left: Estimated marginal survival at mean-baselevel. Right: Baseline survival in cox part." /></p>
 <p>Detach the simulated data.</p>
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">detach</span>(sim.cureph.data)</span></code></pre></div>
 </div>

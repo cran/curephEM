@@ -56,7 +56,8 @@ summary.cureph <- function(object, combine = T, ...)
         var.pos=cumsum(object$var.levels)
         var.range.logistic=mapply(':',2+c(0,var.pos[-length(var.pos)]),1+var.pos)
         var.range.cox=sapply(var.range.logistic,'+',var.pos[length(var.pos)])
-        var.range = mapply('c',var.range.logistic,var.range.cox)
+        var.range = mapply('c',var.range.logistic,var.range.cox,
+                           SIMPLIFY = FALSE)
 
         chi.wald = unlist(sapply(var.range,function(var.range,var,b)
         {if(any(is.na(b[var.range])))

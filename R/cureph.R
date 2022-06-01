@@ -58,7 +58,9 @@ cureph=function (formula, formula2 , data,  subset, na.action, init, control,
     event = as.numeric(Y[,2] == 1)
     origin = attributes(Y)$origin
     time = rep(origin,data.n)
-    end = min(time2[Y[,2] == 0])
+    end = min(c(time2[Y[,2] == 0],
+                max(time2[Y[,2] == 1])+
+                  min(diff(sort(unique(time2))))/2))
 
     Y=Surv.cure(time,time2,event, origin=origin, end=end)
   }
@@ -226,7 +228,7 @@ cureph=function (formula, formula2 , data,  subset, na.action, init, control,
   {
     fit$var.levels = pmax(sapply(data[,
                                      apply(outer(attr(Terms1,"term.labels"),colnames(data),'==')
-                                          ,1,which)]
+                                          ,1,which), drop = FALSE]
                                 ,nlevels)-1,1)
   }
 

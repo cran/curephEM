@@ -46,7 +46,7 @@ The NPMLE baseline survival is estimated in a Breslow-Nelson-Aalen fashion.
  \item{surv.cox}{the marginal survival table for the cure-rate model. }
  \item{surv.cureph}{the conditional survival table for event time CoxPH model. }
 
- \item{}{The object will also contain the following: \code{censored}, \code{origin} and \code{end}.}
+ \item{...}{The object will also contain the following: \code{censored}, \code{origin} and \code{end}.}
 }
 
 \author{

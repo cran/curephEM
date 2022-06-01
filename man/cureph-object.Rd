@@ -22,7 +22,7 @@ This class of objects is returned by the \code{cureph} class of functions to rep
   \item{method}{the computation method used.}
   \item{na.action}{the na.action attribute, if any, that was returned by the \code{na.action} routine.}
 
-\item{}{The object will also contain the following: \code{terms.logistic}, \code{terms.cox}, \code{assign.logistic}, \code{assign.cox}, \code{df}, \code{var.levels}, \code{formula.logistic}, \code{formula.cox}, \code{contrasts.logistic}, \code{contrasts.cox}, \code{call}, \code{data}, \code{Y}, \code{origin} and \code{end}.}
+\item{...}{The object will also contain the following: \code{terms.logistic}, \code{terms.cox}, \code{assign.logistic}, \code{assign.cox}, \code{df}, \code{var.levels}, \code{formula.logistic}, \code{formula.cox}, \code{contrasts.logistic}, \code{contrasts.cox}, \code{call}, \code{data}, \code{Y}, \code{origin} and \code{end}.}
 }
 
 \seealso{
