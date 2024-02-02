@@ -1,4 +1,4 @@
-19c78dd78104a896cb7b019321eb5e79 *DESCRIPTION
+d72d5d74e4bc624992b2315b17539414 *DESCRIPTION
 af02a305b3a35a5944346a71976fc429 *NAMESPACE
 c24cd4ddeb112ed764503fa6e048d828 *R/CureCoxEM.R
 b300c62bed220b31c579fa415403e30a *R/Survcure.R
@@ -9,11 +9,11 @@ ebdf5f1ff4183cd6d3f404bfc888a7ff *R/cureph.R
 2f596bf11ac690802db7d133c2482103 *R/simgen.R
 80887505ac6acece8ccce1db3441206e *R/summary_cureph.R
 11689c800f7a5699e306242ec6cf3b9e *R/var_Louis.R
-5fa374777042a5fb01d3f2d091a1d388 *build/vignette.rds
+1077b6dd149ef551452119808cc669d1 *build/vignette.rds
 1db2e1e728c5e8ecf565f11b74fc5e8f *data/sim.cureph.data.rda
-b2014b40bb4b5b3a303dc0b5941227dc *inst/doc/curephEM-vignette.R
-668980819088608103c77d6ec597c13b *inst/doc/curephEM-vignette.Rmd
-4290ffb93636d10ea90a6c265f5926d9 *inst/doc/curephEM-vignette.html
+18e0f984145ecabd6c5aa733cef75689 *inst/doc/curephEM-vignette.R
+0863e477ea3a996db367822c41c22158 *inst/doc/curephEM-vignette.Rmd
+7870ef09f0e910988fbc28ce07cbb4a9 *inst/doc/curephEM-vignette.html
 9156b0e501fc645836b598d2b2f2d0a1 *inst/test/testthat.R
 d45a647f4843b49067392c028b7b9254 *man/Survcure.Rd
 0ec3aedc34405ec844ae84e94d8352fa *man/cureph-control.Rd
@@ -23,4 +23,4 @@ f8bd17a29e44f2999dd3fb2dcc1c5938 *man/sim-cureph-data.Rd
 541e67fea54073edb418ede3b9e71907 *man/summary_cureph.Rd
 fff9169649861cbe3b16c1177e426403 *man/survpred-cureph.Rd
 0708472cb49d68205c94d0ee09c4bbd0 *vignettes/cureph-vignette.html
-668980819088608103c77d6ec597c13b *vignettes/curephEM-vignette.Rmd
+0863e477ea3a996db367822c41c22158 *vignettes/curephEM-vignette.Rmd

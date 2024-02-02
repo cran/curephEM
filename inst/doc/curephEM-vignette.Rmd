@@ -12,6 +12,8 @@ vignette: >
 This is a brief guide on package `cureph` illustrated with a simulated data set. First, you should load the package. 
 ```{r, results= 'hide'}
 library(curephEM)
+devtools::load_all()
+set.seed(531)
 ```
 
 ## The simulated data
@@ -20,7 +22,6 @@ You may generate a simulated dataset using the build-in function `cureph.simgen(
 
 ```{r}
 sim.cureph.data = cureph.simgen()
-attach(sim.cureph.data)
 ```
 
 The true parameters are stored in the attributes `true.coef` and `true.baseline.surv`. 
@@ -31,10 +32,6 @@ attr(sim.cureph.data, 'true.coef')
 ## Fit the model
 
 You may use the conventional syntax for `coxph` to fit a `cureph`, except for the use of a newly defined `Surv.cure` object instead of `Surv`. 
-
-```{r, results= 'hide'}
-Surv.cure(time,time2,event,origin=0,end=20)
-```
 
 If only one formula is provided, the set of covariates goes into both the logistic part and the cox part of the model. 
 ```{r, results= 'hide',warning=F}
@@ -65,7 +62,3 @@ plot(mysurv)
 plot(mysurv, pooled = F)
 ```
 
-Detach the simulated data. 
-```{r}
-detach(sim.cureph.data)
-```

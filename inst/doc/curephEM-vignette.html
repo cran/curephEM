@@ -12,33 +12,46 @@
 
 <meta name="author" content="Jue (Marquis) Hou" />
 
-<meta name="date" content="2022-05-31" />
+<meta name="date" content="2024-02-01" />
 
 <title>Fit Logistic-CoxPH Cure-Rate Model</title>
 
-<script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
 
 <style type="text/css">
-  code{white-space: pre-wrap;}
-  span.smallcaps{font-variant: small-caps;}
-  span.underline{text-decoration: underline;}
-  div.column{display: inline-block; vertical-align: top; width: 50%;}
-  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-  ul.task-list{list-style: none;}
-    </style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
 
 
 <style type="text/css">
-  code {
-    white-space: pre;
-  }
-  .sourceCode {
-    overflow: visible;
-  }
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
 </style>
 <style type="text/css" data-origin="pandoc">
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -52,55 +65,54 @@ pre > code.sourceCode { white-space: pre-wrap; }
 pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
-  { counter-reset: source-line 0; }
+{ counter-reset: source-line 0; }
 pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
+{ position: relative; left: -4em; counter-increment: source-line; }
 pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
 div.sourceCode
-  {   }
+{ }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
 </style>
 <script>
 // apply pandoc div.sourceCode style to pre.sourceCode instead
@@ -109,13 +121,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -127,7 +146,187 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<link rel="stylesheet" href="data:text/css,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 
 
@@ -141,21 +340,26 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <h1 class="title toc-ignore">Fit Logistic-CoxPH Cure-Rate Model</h1>
 <h4 class="author">Jue (Marquis) Hou</h4>
-<h4 class="date">2022-05-31</h4>
+<h4 class="date">2024-02-01</h4>
 
 
 
-<p>This is a brief guide on package <code>cureph</code> illustrated with a simulated data set. First, you should load the package.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(curephEM)</span></code></pre></div>
+<p>This is a brief guide on package <code>cureph</code> illustrated with
+a simulated data set. First, you should load the package.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(curephEM)</span></code></pre></div>
 <pre><code>## Loading required package: survival</code></pre>
 <pre><code>## Loading required package: Matrix</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">load_all</span>()</span></code></pre></div>
+<pre><code>## ℹ Loading curephEM</code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">531</span>)</span></code></pre></div>
 <div id="the-simulated-data" class="section level2">
 <h2>The simulated data</h2>
-<p>You may generate a simulated dataset using the build-in function <code>cureph.simgen()</code></p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sim.cureph.data <span class="ot">=</span> <span class="fu">cureph.simgen</span>()</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">attach</span>(sim.cureph.data)</span></code></pre></div>
-<p>The true parameters are stored in the attributes <code>true.coef</code> and <code>true.baseline.surv</code>.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(sim.cureph.data, <span class="st">&#39;true.coef&#39;</span>)</span></code></pre></div>
+<p>You may generate a simulated dataset using the build-in function
+<code>cureph.simgen()</code></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>sim.cureph.data <span class="ot">=</span> <span class="fu">cureph.simgen</span>()</span></code></pre></div>
+<p>The true parameters are stored in the attributes
+<code>true.coef</code> and <code>true.baseline.surv</code>.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">attr</span>(sim.cureph.data, <span class="st">&#39;true.coef&#39;</span>)</span></code></pre></div>
 <pre><code>## $a
 ## [1]  1.00 -0.63  1.00  0.00  0.00  0.00  0.00
 ## 
@@ -164,20 +368,27 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <div id="fit-the-model" class="section level2">
 <h2>Fit the model</h2>
-<p>You may use the conventional syntax for <code>coxph</code> to fit a <code>cureph</code>, except for the use of a newly defined <code>Surv.cure</code> object instead of <code>Surv</code>.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">Surv.cure</span>(time,time2,event,<span class="at">origin=</span><span class="dv">0</span>,<span class="at">end=</span><span class="dv">20</span>)</span></code></pre></div>
-<p>If only one formula is provided, the set of covariates goes into both the logistic part and the cox part of the model.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fit<span class="ot">=</span><span class="fu">cureph</span>(<span class="fu">Surv.cure</span>(time,time2,event,<span class="at">origin=</span><span class="dv">0</span>,<span class="at">end=</span><span class="dv">20</span>)<span class="sc">~</span>Z1<span class="sc">+</span>Z2<span class="sc">+</span>Z3<span class="sc">+</span>Z4,<span class="at">data=</span>sim.cureph.data)</span></code></pre></div>
-<pre><code>## Converge at step  86</code></pre>
-<p>Alternatively, you can provide two formulae—first <code>formula</code> for logistic part, then <code>formula2</code> for cox part.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fit2<span class="ot">=</span><span class="fu">cureph</span>(<span class="fu">Surv.cure</span>(time,time2,event,<span class="at">origin=</span><span class="dv">0</span>,<span class="at">end=</span><span class="dv">20</span>)<span class="sc">~</span>Z1<span class="sc">+</span>Z2<span class="sc">+</span>Z3<span class="sc">+</span>Z4,</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula2 =</span> <span class="sc">~</span> Z1<span class="sc">+</span>Z2,<span class="at">data=</span>sim.cureph.data)</span></code></pre></div>
-<pre><code>## Converge at step  53</code></pre>
+<p>You may use the conventional syntax for <code>coxph</code> to fit a
+<code>cureph</code>, except for the use of a newly defined
+<code>Surv.cure</code> object instead of <code>Surv</code>.</p>
+<p>If only one formula is provided, the set of covariates goes into both
+the logistic part and the cox part of the model.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>fit<span class="ot">=</span><span class="fu">cureph</span>(<span class="fu">Surv.cure</span>(time,time2,event,<span class="at">origin=</span><span class="dv">0</span>,<span class="at">end=</span><span class="dv">20</span>)<span class="sc">~</span>Z1<span class="sc">+</span>Z2<span class="sc">+</span>Z3<span class="sc">+</span>Z4,<span class="at">data=</span>sim.cureph.data)</span></code></pre></div>
+<pre><code>## Converge at step  55</code></pre>
+<p>Alternatively, you can provide two formulae—first
+<code>formula</code> for logistic part, then <code>formula2</code> for
+cox part.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>fit2<span class="ot">=</span><span class="fu">cureph</span>(<span class="fu">Surv.cure</span>(time,time2,event,<span class="at">origin=</span><span class="dv">0</span>,<span class="at">end=</span><span class="dv">20</span>)<span class="sc">~</span>Z1<span class="sc">+</span>Z2<span class="sc">+</span>Z3<span class="sc">+</span>Z4,</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>  <span class="at">formula2 =</span> <span class="sc">~</span> Z1<span class="sc">+</span>Z2,<span class="at">data=</span>sim.cureph.data)</span></code></pre></div>
+<pre><code>## Converge at step  62</code></pre>
 </div>
 <div id="post-estimation" class="section level2">
 <h2>Post Estimation</h2>
-<p>A detailed summary can be produced in a generic way. A multivariate Wald test table is activated if the two sets of covariates are detected to be the same. The null hypothesis is all the coefficients associated with the listed covariate are all zero.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div>
+<p>A detailed summary can be produced in a generic way. A multivariate
+Wald test table is activated if the two sets of covariates are detected
+to be the same. The null hypothesis is all the coefficients associated
+with the listed covariate are all zero.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">summary</span>(fit)</span></code></pre></div>
 <pre><code>## Call:
 ## cureph(formula = Surv.cure(time, time2, event, origin = 0, end = 20) ~ 
 ##     Z1 + Z2 + Z3 + Z4, data = sim.cureph.data)
@@ -193,64 +404,67 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  
 ## Logistic:
 ##             coef    exp(coef) se(coef) z      Pr(&gt;|z|)    
-## (Intercept) 1.9372  6.9393    0.9579   2.022  0.043    *  
-## Z1          -0.8117 0.4441    0.2364   -3.434 6e-04    ***
-## Z21         0.5959  1.8148    0.4702   1.268  0.205       
-## Z3B         -0.2848 0.7522    0.5293   -0.538 0.591       
-## Z3C         -0.1986 0.8199    0.5498   -0.361 0.718       
-## Z41         -0.3741 0.6879    0.4595   -0.814 0.416       
+## (Intercept) 0.9459  2.5752    0.9336   1.013  0.311       
+## Z1          -0.7521 0.4714    0.2282   -3.296 0.001    ***
+## Z21         1.8655  6.4593    0.5319   3.507  5e-04    ***
+## Z3B         -0.3145 0.7302    0.5646   -0.557 0.578       
+## Z3C         0.214   1.2386    0.5917   0.362  0.718       
+## Z41         -0.1346 0.874     0.516    -0.261 0.794       
 ## Z42         &lt;NA&gt;    &lt;NA&gt;      0        &lt;NA&gt;   &lt;NA&gt;        
 ## 
 ## Cox:
 ##     coef    exp(coef) se(coef) z      Pr(&gt;|z|)  
-## Z1  -0.1013 0.9036    0.2085   -0.486 0.627     
-## Z21 0.5145  1.6728    0.661    0.778  0.436     
-## Z3B -0.2278 0.7963    0.6693   -0.34  0.734     
-## Z3C -0.3241 0.7232    0.6701   -0.484 0.629     
-## Z41 0.0632  1.0653    0.5753   0.11   0.913     
+## Z1  -0.1167 0.8899    0.3015   -0.387 0.699     
+## Z21 0.7901  2.2037    0.5913   1.336  0.181     
+## Z3B 0.2813  1.3248    0.5862   0.48   0.631     
+## Z3C -0.132  0.8763    0.5723   -0.231 0.818     
+## Z41 -0.0369 0.9637    0.5303   -0.07  0.944     
 ## Z42 &lt;NA&gt;    &lt;NA&gt;      0        &lt;NA&gt;   &lt;NA&gt;      
 ## 
 ## Combined Wald tests: 
-##    Wald-chi.square df p-value   
-## Z1 12.944          2  0.002   **
-## Z2 2.743           2  0.254     
-## Z3 0.717           4  0.949     
-## Z4 &lt;NA&gt;            4  &lt;NA&gt;      
+##    Wald-chi.square df p-value    
+## Z1 11.018          2  0.004   ** 
+## Z2 15.46           2  4e-04   ***
+## Z3 1.518           4  0.823      
+## Z4 &lt;NA&gt;            4  &lt;NA&gt;       
 ## --- 
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## Logistic:
 ##             exp(coef) exp(-coef) lower .95 upper .95
-## (Intercept)    6.9393     0.1441    1.0616   45.3584
-## Z1             0.4441     2.2518    0.2794    0.7058
-## Z21            1.8148     0.5510    0.7221    4.5606
-## Z3B            0.7522     1.3295    0.2665    2.1225
-## Z3C            0.8199     1.2197    0.2791    2.4082
-## Z41            0.6879     1.4537    0.2795    1.6930
+## (Intercept)    2.5752     0.3883    0.4132   16.0497
+## Z1             0.4714     2.1214    0.3014    0.7372
+## Z21            6.4593     0.1548    2.2773   18.3212
+## Z3B            0.7302     1.3695    0.2414    2.2082
+## Z3C            1.2386     0.8074    0.3884    3.9503
+## Z41            0.8740     1.1441    0.3179    2.4031
 ## Z42                NA         NA        NA        NA
 ## 
 ## Cox:
 ##     exp(coef) exp(-coef) lower .95 upper .95
-## Z1     0.9036     1.1066    0.6005     1.360
-## Z21    1.6728     0.5978    0.4579     6.111
-## Z3B    0.7963     1.2559    0.2144     2.957
-## Z3C    0.7232     1.3828    0.1945     2.689
-## Z41    1.0653     0.9387    0.3449     3.290
+## Z1     0.8899     1.1237    0.4928     1.607
+## Z21    2.2037     0.4538    0.6916     7.022
+## Z3B    1.3248     0.7548    0.4199     4.179
+## Z3C    0.8763     1.1411    0.2854     2.691
+## Z41    0.9637     1.0376    0.3408     2.725
 ## Z42        NA         NA        NA        NA
 ## 
-## Wald test = 39.62 on 11 df, p = 4.149e-05</code></pre>
-<p>Another function <code>survpred</code> combines conventional <code>predict</code> and <code>survfit</code>. It returns the linear predictors for both part, the estimated probabilities, the mean-baselevel survival in cox part and the marginal mean-baselevel survival.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mysurv <span class="ot">=</span> <span class="fu">survpred</span>(fit)</span></code></pre></div>
+## Wald test = 43 on 11 df, p = 1.086e-05</code></pre>
+<p>Another function <code>survpred</code> combines conventional
+<code>predict</code> and <code>survfit</code>. It returns the linear
+predictors for both part, the estimated probabilities, the
+mean-baselevel survival in cox part and the marginal mean-baselevel
+survival.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>mysurv <span class="ot">=</span> <span class="fu">survpred</span>(fit)</span></code></pre></div>
 <pre><code>## Warning in prob0 * surv.cox: Recycling array of length 1 in array-vector arithmetic is deprecated.
 ##   Use c() or as.vector() instead.</code></pre>
 <pre><code>## Warning in 1 - prob0 + prob0 * surv.cox: Recycling array of length 1 in array-vector arithmetic is deprecated.
 ##   Use c() or as.vector() instead.</code></pre>
-<p>The generic <code>plot</code> function produces the survival curves.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mysurv)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mysurv, <span class="at">pooled =</span> F)</span></code></pre></div>
-<p><img src="data:image/png;base64,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" alt="Left: Estimated marginal survival at mean-baselevel. Right: Baseline survival in cox part." /><img src="data:image/png;base64,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" alt="Left: Estimated marginal survival at mean-baselevel. Right: Baseline survival in cox part." /></p>
-<p>Detach the simulated data.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">detach</span>(sim.cureph.data)</span></code></pre></div>
+<p>The generic <code>plot</code> function produces the survival
+curves.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a><span class="fu">plot</span>(mysurv)</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">plot</span>(mysurv, <span class="at">pooled =</span> F)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" alt="Left: Estimated marginal survival at mean-baselevel. Right: Baseline survival in cox part." /><img src="data:image/png;base64,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" alt="Left: Estimated marginal survival at mean-baselevel. Right: Baseline survival in cox part." /></p>
 </div>
 
 
